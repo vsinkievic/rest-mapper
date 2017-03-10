@@ -9,10 +9,10 @@
     </publications>
 
     <dependencies>
-<!--         <dependency org="bfv" name="spring4oe" rev="1.0.+">
+        <dependency org="bfv" name="spring4oe" rev="1.0.+">
             <artifact name="spring4oe" ext="zip" />
         </dependency>
-        <dependency org="com.bpmid" name="oe-commons" rev="1.0.+">
+<!--        <dependency org="com.bpmid" name="oe-commons" rev="1.0.+">
             <artifact name="oe-commons" ext="zip" />
         </dependency> -->
     </dependencies>

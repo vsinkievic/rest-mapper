@@ -19,6 +19,9 @@ class bpmid.rest-mapper.RestService abstract:
         def var s as longchar no-undo.
         
         h:write-json("longchar", s, true).
+        if s = ? or length(s) <=4
+        then return "[]".
+        
         s = substr(s, index(s, ":") + 1).
         s = substr(s, 1, length(s) - 2).
         return s.

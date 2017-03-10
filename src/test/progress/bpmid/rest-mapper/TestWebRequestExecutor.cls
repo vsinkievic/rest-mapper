@@ -76,7 +76,7 @@ class bpmid.rest-mapper.TestWebRequestExecutor:
         moExec:requestContentType = "".
         moExec:ExecuteRequest(?, "bpmid.rest-mapper.TestRestController", "throwSimpleRestError", "").
         
-        Assert:Equals('~{ "err": "Error", "msg": "Does not work", "message": "Does not work" }', moExec:responseBody).  /* patikslinti, turi b�ti progress klaidos tekstas */
+        Assert:Equals('~{ "err": "Error", "msg": "Does not work", "message": "Does not work", "path": "?" }', moExec:responseBody).  /* patikslinti, turi b�ti progress klaidos tekstas */
         Assert:Equals(401, moExec:responseStatus).
         Assert:Equals("application/json", moExec:responseContentType).
         

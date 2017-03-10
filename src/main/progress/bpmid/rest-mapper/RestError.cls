@@ -32,12 +32,20 @@ class bpmid.rest-mapper.RestError inherits AppError:
 	 Notes:
 	------------------------------------------------------------------------------*/
 		
-	constructor public RestError ( iResponseStatus as int, oAppError as Error ):
+	constructor public RestError ( iResponseStatus as int, oError as Error ):
 		super ().
-		
+		def var oAppError as Progress.Lang.AppError no-undo.
+		 
 		responseStatus = iResponseStatus.
-		msg = oAppError:GetMessage(1).
-		err = oAppError:GetClass():TypeName.
+		msg = oError:GetMessage(1).
+		err = oError:GetClass():TypeName.
+		
+		if err ="Progress.Lang.AppError"
+		then do:
+		    oAppError = cast(oError, Progress.Lang.AppError).
+		    if oAppError:ReturnValue > ""
+		    then msg = msg + oAppError:ReturnValue.
+		end.
 		
 	end constructor.
 

@@ -43,6 +43,7 @@ class bpmid.rest-mapper.UrlMapperTest:
 	def var mcPathParams as char no-undo.
 	def var mlFound as log no-undo.
 	def var mcRoles as char no-undo.
+	def var mcResponseCType as char no-undo.
 
 	/*------------------------------------------------------------------------------
 	 Purpose:.
@@ -175,7 +176,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/any").
         moWebRequest:Method = "DELETE".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -196,7 +197,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/any").
         moWebRequest:Method = "GET".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -218,7 +219,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:Method = "GET".
         moWebRequest:SetHeader(new HttpHeader("Accept", "application/pdf")).
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -239,7 +240,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/any").
         moWebRequest:Method = "POST".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -260,7 +261,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/any").
         moWebRequest:Method = "PUT".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -280,7 +281,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/items/byOtherId/555").
         moWebRequest:Method = "GET".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -301,7 +302,7 @@ class bpmid.rest-mapper.UrlMapperTest:
 	    moWebRequest:Method = "POST".
 	    moWebRequest:ContentType = "application/json".
 	    
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
 	    
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -323,7 +324,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/items/1").
         moWebRequest:Method = "DELETE".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -345,7 +346,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:Method = "GET".
         moWebRequest:SetHeader(new HTTPHeader("Accept", "application/pdf")).
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -366,7 +367,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/items/1").
         moWebRequest:Method = "GET".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -386,7 +387,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/items/2/rows").
         moWebRequest:Method = "GET".
 
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
 
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -407,7 +408,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/items/2/subentities").
         moWebRequest:Method = "GET".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -429,7 +430,7 @@ class bpmid.rest-mapper.UrlMapperTest:
 /*        moWebRequest:URI = _Uri("/items/2/notexist").                                                                                 */
 /*        moWebRequest:Method = "GET".                                                                                                  */
 /*                                                                                                                                      */
-/*        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).*/
+/*        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).*/
 /*                                                                                                                                      */
 /*        Assert:IsTrue(not mlFound).                                                                                                   */
 /*                                                                                                                                      */
@@ -446,7 +447,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/items").
         moWebRequest:Method = "GET".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -468,7 +469,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/items/1?filter=hoho").
         moWebRequest:Method = "GET".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -490,7 +491,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/items?filter=hoho").
         moWebRequest:Method = "GET".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -527,7 +528,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:URI = _Uri("/category/users/edit/222/edit").
         moWebRequest:Method = "GET".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).
@@ -551,6 +552,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         mcPathParams = ?.
         mlFound = false.
         mcRoles = ?.
+        mcResponseCType = ?.
 		return.
  
 	end method.
@@ -582,7 +584,7 @@ class bpmid.rest-mapper.UrlMapperTest:
         moWebRequest:Method = "PUT".
         moWebRequest:ContentType = "application/json".
         
-        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcRoles).
+        mlFound = moUrlMapper:FindRequestExecutor(moWebRequest, output mcClass, output mcMethod, output mcPathParams, output mcResponseCType, output mcRoles).
         
         Assert:IsTrue(mlFound).
         Assert:Equals("bpmid.rest-mapper.MyController", mcClass).

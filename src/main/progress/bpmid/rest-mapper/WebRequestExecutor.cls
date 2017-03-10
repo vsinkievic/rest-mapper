@@ -13,14 +13,29 @@ using Progress.Lang.*.
 using Progress.Reflect.*.
 using bpmid.rest-mapper.*.
 using OpenEdge.Web.IWebRequest.
+using OpenEdge.Net.HTTP.*.
+using bfv.spring4oe.beans.factory.*.
 
 block-level on error undo, throw.
 
 class bpmid.rest-mapper.WebRequestExecutor: 
 
     def private var mcClassName as char no-undo.
-    def private var mcMethodName as char no-undo. 
+    def private var mcMethodName as char no-undo.
+    def private var mcHostUrl as char no-undo. // HOST_URL? 
+    def private var mcAppUrl as char no-undo. // SCRIPT_NAME
+    def private var mcSelfUrl as char no-undo. // REQUEST_URI arba SCRIPT_URL
+    def private var mcHttpHost as char no-undo. // domain line www.lateko.lt
+    def private var mlPersistenVarsInitialized as log no-undo.
     
+	define public property responseCookie as Cookie no-undo 
+	get.
+	private set. 
+
+    define public property responseCookies as CookieCollection no-undo 
+    get.
+    private set. 
+
     define static protected property singletonObject as WebRequestExecutor no-undo 
     get.
     set. 
@@ -59,6 +74,35 @@ class bpmid.rest-mapper.WebRequestExecutor:
 	get.
 	private set. 
 
+
+	/*------------------------------------------------------------------------------
+	 Purpose:
+	 Notes:
+	------------------------------------------------------------------------------*/
+
+	method private character _fixParamValue( pcValue as char ):
+		def var cFixedValue as char no-undo.
+		
+		cFixedValue = replace(pcValue, "~r~n":U, "~n":U).
+		cFixedValue = codepage-convert(cFixedValue, session:cpinternal, "utf-8").
+
+		return cFixedValue.
+
+	end method.
+
+	/*------------------------------------------------------------------------------
+	 Purpose:
+	 Notes:
+	------------------------------------------------------------------------------*/
+
+	method private character _getCgiValue( pcEnv as char, pcParam as char ):
+		
+		if session:client-type = "WEBSPEED"
+        then return web-context:get-cgi-value(pcEnv, pcParam).
+        else return ?. 
+
+	end method.
+
 	/*------------------------------------------------------------------------------
 	 Purpose:
 	 Notes:
@@ -82,6 +126,25 @@ class bpmid.rest-mapper.WebRequestExecutor:
 		    end.
 		end.
 		return "".
+
+	end method.
+
+	/*------------------------------------------------------------------------------
+	 Purpose:
+	 Notes:
+	------------------------------------------------------------------------------*/
+
+	method private void _initPersistentVariables(  ):
+		if mlPersistenVarsInitialized
+		then return.
+
+        if session:client-type = "WEBSPEED"
+        then do:
+            mcHostUrl  = web-context:get-cgi-value("env", "HOST_URL"). 
+            mcAppUrl   = web-context:get-cgi-value("env", "SCRIPT_NAME").
+            mcSelfUrl  = web-context:get-cgi-value("env", "REQUEST_URI"). // arba SCRIPT_URL
+    		mcHttpHost = web-context:get-cgi-value("env", "HTTP_HOST").
+		end.
 
 	end method.
 
@@ -158,11 +221,11 @@ class bpmid.rest-mapper.WebRequestExecutor:
 
 	method private void _IsParameterValid( oParameter as Parameter, cExpectedDataType as char, cExpectedMode as char):
 		
-		if cExpectedDataType <> oParameter:DataType:ToString()
-		then undo, throw new Progress.Lang.AppError(subst("&1 datatype should be &2 in &3:&4", oParameter:Name, cExpectedDataType, mcClassName, mcMethodName), 299).
+		if cExpectedDataType <> oParameter:DataType:ToString() and oParameter:DataType:ToString() <> "Object" 
+		then undo, throw new Progress.Lang.AppError(subst("&1 datatype should be &2 in &3:&4 (current type: &5)", oParameter:Name, cExpectedDataType, mcClassName, mcMethodName, oParameter:DataType:ToString()), 299).
  
         if cExpectedMode <> oParameter:Mode:ToString()
-        then undo, throw new Progress.Lang.AppError(subst("&1 mode should be &2 in &3:&4", oParameter:Name, cExpectedMode, mcClassName, mcMethodName), 298).
+        then undo, throw new Progress.Lang.AppError(subst("&1 mode should be &2 in &3:&4 (current mode: &5)", oParameter:Name, cExpectedMode, mcClassName, mcMethodName, oParameter:Mode:ToString()), 298).
 
 		return.
 
@@ -192,7 +255,8 @@ class bpmid.rest-mapper.WebRequestExecutor:
 
 	method private longchar _OutputRestErrorAsJSON( oRestError as RestError ):
 		
-        return subst('~{ "err": "&1", "msg": "&2", "message": "&2" ~}', oRestError:err, oRestError:msg).
+        return subst('~{ "err": "&1", "msg": "&2", "message": "&2", "path": "&3" ~}', 
+                        oRestError:err, oRestError:msg, _getCgiValue("env", "REQUEST_URI")).
 
 	end method.
 
@@ -204,7 +268,8 @@ class bpmid.rest-mapper.WebRequestExecutor:
 
     method private longchar _OutputRestErrorAsHtml( oRestError as RestError ):
         
-        return subst('<html><body><h1>&1</h1><p>&2</p></body></html>', oRestError:err, oRestError:msg).
+        return subst('<html><body><h1>&1</h1><p>&2</p></body></html>', 
+                    oRestError:err, oRestError:msg, _getCgiValue("env", "REQUEST_URI")).
 
     end method.
 
@@ -218,6 +283,8 @@ class bpmid.rest-mapper.WebRequestExecutor:
 		set-size(responseBodyMptr) = 0.
 		responseContentType = defaultResponseContentType.
 		responseStatus = 200.
+		delete object (responseCookie) no-error.
+		delete object (responseCookies) no-error.
 		return.
 
 	end method.
@@ -254,6 +321,7 @@ class bpmid.rest-mapper.WebRequestExecutor:
 
 	method public void ExecuteRequest( poRequest as iWebRequest, cClassName as char, cMethodName as char, pcPathParams as char ):
         
+        define variable lIsBean as logical no-undo.
         define variable oClass as class Class no-undo.
         define variable oObject as Object no-undo.
         define variable oMethods as class Method extent no-undo.
@@ -271,11 +339,24 @@ class bpmid.rest-mapper.WebRequestExecutor:
         define variable cParamValue as char no-undo.
         define variable iIntValue as integer no-undo.
         define variable iInt64Value as int64 no-undo.
+
+        _initPersistentVariables().
         
         mcClassName = cClassName.
         mcMethodName = cMethodName.
         
-        oClass = Class:GetClass(cClassName).
+        if cClassName begins "bean:"
+        then do:
+           lIsBean = true.
+           cClassName = substr(cClassName, 6). 
+           oObject = XmlBeanFactory:DefaultFactory:GetBean(cClassName).
+           oClass = oObject:GetClass().
+           cClassName = oClass:TypeName.
+        end.
+        else do:
+            oClass = Class:GetClass(cClassName).
+            oObject = oClass:New().
+        end.
         
         extent(oMethods) = ?.
         oMethods = oClass:GetMethods().
@@ -295,6 +376,36 @@ class bpmid.rest-mapper.WebRequestExecutor:
                     oParameter = oDeclaredParameters[parametersLoop].
                     
                     case oParameter:Name:
+                        when "app_url" or when "appUrl"then do:
+                            _IsParameterValid(oParameter, "CHARACTER", "INPUT").
+                            oInvokeParameters:SETPARAMETER (parametersLoop, "CHARACTER", "INPUT", mcAppUrl).    
+                        end.
+
+                        when "host_domain" or when "HTTP_HOST" then do:
+                            _IsParameterValid(oParameter, "CHARACTER", "INPUT").
+                            oInvokeParameters:SETPARAMETER (parametersLoop, "CHARACTER", "INPUT", mcHttpHost).    
+                        end.
+                        
+                        when "host_url" or when "hostUrl"then do:
+                            _IsParameterValid(oParameter, "CHARACTER", "INPUT").
+                            oInvokeParameters:SETPARAMETER (parametersLoop, "CHARACTER", "INPUT", mcHostUrl).    
+                        end.
+
+                        when "requestCookie" then do:
+                            _IsParameterValid(oParameter, "CHARACTER", "INPUT").
+                            oInvokeParameters:SETPARAMETER (parametersLoop, "CHARACTER", "INPUT", _getCgiValue("ENV":U, "HTTP_COOKIE")).    
+                        end.
+
+                        when "responseCookie" then do:
+                            _IsParameterValid(oParameter, "OpenEdge.Net.HTTP.Cookie", "OUTPUT").
+                            oInvokeParameters:SETPARAMETER (parametersLoop, "OpenEdge.Net.HTTP.Cookie", "OUTPUT", responseCookie).    
+                        end.
+                        
+                        when "responseCookies" then do:
+                            _IsParameterValid(oParameter, "OpenEdge.Net.HTTP.CookieCollection", "OUTPUT").
+                            oInvokeParameters:SETPARAMETER (parametersLoop, "OpenEdge.Net.HTTP.CookieCollection", "OUTPUT", responseCookies).    
+                        end.
+                        
                         when "requestBody" then do:
                             copy-lob web-context:form-long-input to cRequestBody 
                                 convert target codepage session:cpinternal source codepage _getProgressEncoding(defaultResponseCharacterEncoding).
@@ -350,13 +461,13 @@ class bpmid.rest-mapper.WebRequestExecutor:
                                 cParamType = entry(1, oParameter:name, "_").
                                 case cParamType:
                                     when "qry"   
-                                    then cParamValue = replace(web-context:get-cgi-value ("QUERY", trim(substr(oParameter:name, 5))), "~r~n":U, "~n":U).
+                                    then cParamValue = _fixParamValue(_getCgiValue("QUERY", trim(substr(oParameter:name, 5)))).
                                     
                                     when "query" 
-                                    then cParamValue = replace(web-context:get-cgi-value ("QUERY", substr(oParameter:name, 7)), "~r~n":U, "~n":U).
+                                    then cParamValue = _fixParamValue(_getCgiValue("QUERY", substr(oParameter:name, 7))).
                                     
                                     when "form"  
-                                    then cParamValue = replace(web-context:get-cgi-value ("FORM", substr(oParameter:name, 6)), "~r~n":U, "~n":U).
+                                    then cParamValue = _fixParamValue(_getCgiValue("FORM", substr(oParameter:name, 6))).
                                     
                                     otherwise cParamValue = _GetParameter(pcPathParams, oParameter:Name).                                         
                                end.
@@ -409,7 +520,7 @@ class bpmid.rest-mapper.WebRequestExecutor:
                         end.
                     end case.
                 end. 
-                oObject = oClass:New().
+                
                 _ResetValues().
                 
                 do on error undo, throw:
@@ -421,7 +532,16 @@ class bpmid.rest-mapper.WebRequestExecutor:
                         responseStatus = oRestError:responseStatus.     		
                     end catch.
                    
+                    catch ae as Progress.Lang.AppError :
+                        message subst("&1:&2 ERROR: &3: &4 &5", cClassName, cMethodName, ae:GetClass():TypeName, ae:GetMessage(1), ae:ReturnValue).
+                        if ae:CallStack > "" then message ae:CallStack.
+                        responseStatus = 500.
+                        responseBody = _OutputRestError(new RestError(500, ae)).     
+                    end catch.
+
                     catch e as Progress.Lang.Error :
+                        message subst("&1:&2 ERROR: &3: &4 &5", cClassName, cMethodName, e:GetClass():TypeName, e:GetMessage(1)).
+                        if e:CallStack > "" then message e:CallStack.
                         responseStatus = 500.
                         responseBody = _OutputRestError(new RestError(500, e)).		
                     end catch.

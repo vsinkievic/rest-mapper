@@ -252,7 +252,7 @@ class bpmid.rest-mapper.UrlMapper:
      Notes:
     ------------------------------------------------------------------------------*/
 
-    method public logical FindRequestExecutor( poRequest as IWebRequest, output pcClassName as char, output pcMethodName as char, output pcPathParams as char, output pcRolesRequired as char):
+    method public logical FindRequestExecutor( poRequest as IWebRequest, output pcClassName as char, output pcMethodName as char, output pcPathParams as char, output pcResponseContentType as char, output pcRolesRequired as char):
         
         def var cUrl as char no-undo.
         def var cMethod as char no-undo.
@@ -291,6 +291,7 @@ class bpmid.rest-mapper.UrlMapper:
             pcClassName = ttRating.controller.
             pcMethodName = ttRating.ctrlMethod.
             pcPathParams = _GetPathParams(ttRating.requestUrl, _RemoveAgentPath(poRequest:PathInfo)).
+            pcResponseContentType = ttRating.produces.
             pcRolesRequired = ttRating.rolesRequired.
             return true.
         end.
@@ -298,6 +299,8 @@ class bpmid.rest-mapper.UrlMapper:
         pcClassName = ?.
         pcMethodName = ?.
         pcPathParams = ?.
+        pcResponseContentType = ?.
+        pcRolesRequired = ?.
         return false.
     end method.
 
@@ -335,7 +338,7 @@ class bpmid.rest-mapper.UrlMapper:
             import unformatted cRow.
             repeat:
                 create ttUrlMap.
-                import delimiter "~t" ttUrlMap.
+                import delimiter ";" ttUrlMap.
             end.
             input close.
             for each ttUrlMap where ttUrlMap.requestUrl = "":
