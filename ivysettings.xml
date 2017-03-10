@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivy-settings>
+  <property name="artifactory.host" value="artifactory.bpm-id.com" override="false"/>
+  <property name="artifactory.user" value="anonymous"  override="false"/>
+  <property name="artifactory.pass" value="anonymous123"  override="false"/>    
+          
   <settings defaultResolver="artifactory" />
   <!--Authentication required for publishing (deployment). 'Artifactory Realm' is the realm used by Artifactory so don't change it.-->
-  <credentials host="artifactory.bpm-id.com" realm="Artifactory Realm" username="anonymous" />
+  <credentials host="${artifactory.host}" realm="Artifactory Realm" username="${artifactory.user}" passwd="${artifactory.pass}" />
   <resolvers>
-    <url name="artifactory-public-release">
-        <artifact pattern=
-          "http://artifactory.bpm-id.com/artifactory/oe-public-release/[organization]/[module]/[revision]/[artifact]-[revision].[ext]"/>
-        <ivy pattern="http://artifactory.bpm-id.com/artifactory/oe-public-release/[organization]/[module]/[revision]/ivy-[revision].xml" />
+    <url name="artifactory-release">
+        <artifact pattern="http://${artifactory.host}/artifactory/oe-release/[organization]/[module]/[revision]/[artifact]-[revision].[ext]"/>
+        <ivy      pattern="http://${artifactory.host}/artifactory/oe-release/[organization]/[module]/[revision]/ivy-[revision].xml" />
     </url>
-<!--     <url name="artifactory-public-snapshots">
+<!--     <url name="artifactory-snapshots">
         <artifact pattern=
-          "http://artifactory.bpm-id.com/artifactory/oe-public-snapshots/[organization]/[module]/[revision]/[artifact]-[revision].[ext]"/>
-        <ivy pattern="http://artifactory.bpm-id.com/artifactory/oe-public-snapshots/[organization]/[module]/[revision]/ivy-[revision].xml" />
+          "http://${artifactory.host}/artifactory/oe-public-snapshots/[organization]/[module]/[revision]/[artifact]-[revision].[ext]"/>
+        <ivy pattern="http://${artifactory.host}/artifactory/oe-public-snapshots/[organization]/[module]/[revision]/ivy-[revision].xml" />
     </url> -->
     <chain name="artifactory">
-        <url ref="artifactory-public-release" />
+        <url ref="artifactory-release" />
 <!--        <url ref="artifactory-snapshots" /> -->
     </chain>
   </resolvers>
