@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="BPM tasks and KPIs" 
+    xmlns:ivy="antlib:org.apache.ivy.ant"
+    xmlns:pct="antlib:eu/rssw/pct" 
+    xmlns:extras="antlib:eu/rssw/pct/oedoc">
+	
+    <!-- Common, property-driven tasks are in build-common.xml (eg. doc, package, bundle) -->
+    <import file="ivy-common-1.0.xml"/>
+
+    
+    <target name="create-db" description="Create database" depends="pct-init">
+      <mkdir dir="target" />
+      <mkdir dir="target/db" />
+      <delete includeemptydirs="true">
+        <fileset dir="target/db">
+            <include name="rest-mapper/**" />
+        </fileset>
+      </delete>
+    
+      <mkdir dir="target/db/rest-mapper" />
+
+    </target>
+
+	
+	<!-- Builds/compiles the library -->
+	<target name="build" depends="ivy-retrieve,pct-init,cleanup,create-db">
+	    
+        <mkdir dir="target"/>
+        <mkdir dir="target/rcode"/>
+        <mkdir dir="target/src"/>
+		<mkdir dir="target/preprocess"/>
+		
+	    <copy toDir="target/src/" flatten="false" includeemptydirs="false">
+	        <fileset dir="src/main/progress">
+	            <include name="**/*.i" />
+	        </fileset>
+	    </copy>
+
+        <copy toDir="target/rcode/" flatten="false" includeemptydirs="false">
+            <fileset dir="src/main/progress">
+                <include name="**/*.i" />
+            </fileset>
+        </copy>
+
+	    <copy toDir="target/resources/" flatten="false" includeemptydirs="false">
+	          <fileset dir="src/main/resources">
+	              <include name="**/*" />
+	          </fileset>
+	    </copy>
+
+		<pct:compile dlcHome="${DLC}"
+                  graphicalMode="false"
+                  destDir="${buildRoot}/rcode" 
+                  cpStream="UTF-8" 
+                  preprocessDir="${buildRoot}/preprocess"
+                  forceCompile="true">
+			
+			<propath>
+                <pathelement path="${buildRoot}/rcode"/>
+                <pathelement path="src/main/progress"/>
+                <pathelement path="lib/progress"/>
+		        <pathelement location="${env.DLC}/tty/netlib/OpenEdge.Net.pl" />
+			</propath>
+			
+			<fileset dir="src/main/progress">
+				<include name="**/*.p" />
+				<include name="**/*.w" />
+				<include name="**/*.cls" />
+			</fileset>
+			
+			<!--
+			<fileset dir="${projectRoot}/tests">
+				<include name="**/*.p" />
+				<include name="**/*.w" />
+				<include name="**/*.cls" />
+			</fileset>
+			-->
+		</pct:compile>
+	</target>
+
+    <target name="test" depends="build" unless="test.skip">
+        <echo>ABLUnit tests</echo>
+        <delete failonerror="false">
+            <fileset dir="." >
+                <include name="results.xml" />
+                <include name="ablunit.log" />
+                <include name="target/test.log" />
+                <include name="target/*.xlsx" />
+            </fileset>
+        </delete>
+
+     <pct:ablunit haltOnFailure="true" writeLog="true" cpstream="utf-8" dlcHome="${DLC}">
+         <Option name="-clientlog" value="target/test.log" />
+         <Option name="-logentrytypes" value="4GLMessages,4GLTrace,4GLTrans" />
+         <fileset dir="src/test/progress">
+           <include name="**/*.p" />
+           <include name="**/*.cls" />
+         </fileset>
+         <propath>
+             <pathelement location="src/test/progress" />
+             <pathelement location="target/rcode" />
+             <pathelement location="target/rcode/slib" />
+             <pathelement location="target/rcode/slibooxml" />
+             <pathelement location="src/main/progress" />
+             <pathelement location="lib/progress" />
+             <pathelement location="${env.DLC}/tty/ablunit.pl" />
+             <pathelement location="${env.DLC}/tty/OpenEdge.Core.pl" />
+             <pathelement location="${env.DLC}/tty/netlib/OpenEdge.Net.pl" />
+         </propath>
+       </pct:ablunit>
+	</target>
+
+</project>

@@ -1,0 +1,13 @@
+#.project
+#.propath
+#.settings/
+results.xml
+*.launch
+*.pref
+*.xref
+*.r
+/target/
+/rcode/
+/lib/
+
+
