@@ -21,14 +21,14 @@ class bpmid.rest-mapper.RestService abstract:
 
     method protected longchar buf2jsonArray(h as handle):
         def var s as longchar no-undo.
+        def var i as int no-undo.
         
         h:write-json("longchar", s, formatJson).
         if s = ? or length(s) <=4
         then return "[]".
         
-        s = substr(s, index(s, ":") + 1).
-        s = substr(s, 1, length(s) - 2).
-        return s.
+        i = index(s, ":").
+        return substr(s, i + 1, r-index(s, "}") - i - 1).
     end.
     
     method protected longchar buf2jsonObject(h as handle):

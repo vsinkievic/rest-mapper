@@ -65,6 +65,45 @@ class bpmid.rest-mapper.RestServiceTest inherits RestService:
       //  Assert:equals('~{"myKey":"raktas","myVal":"reiksme"}', cJson).
 	end method.
 
+	/*------------------------------------------------------------------------------
+	 Purpose:
+	 Notes:
+	------------------------------------------------------------------------------*/
+
+	@Test.
+	method public void saveTempTableAsArray(  ):  
+        def var cJson as longchar no-undo.        
+        // given
+        create ttObject. ttObject.my_key = "raktas 1". ttObject.my_val = "reiksme 1".
+        create ttObject. ttObject.my_key = "raktas 2". ttObject.my_val = "reiksme 2".
+                
+        // when
+        cJson = buf2jsonArray(buffer ttObject:handle).
+        
+        // then
+        copy-lob from cJson to file "target/saveTempTableAsArray.json".
+	end method.
+
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    @Test.
+    method public void saveTempTableAsFormattedArray(  ):  
+        def var cJson as longchar no-undo.        
+        // given
+        create ttObject. ttObject.my_key = "raktas 1". ttObject.my_val = "reiksme 1".
+        create ttObject. ttObject.my_key = "raktas 2". ttObject.my_val = "reiksme 2".
+        this-object:formatJson = true.
+                
+        // when
+        cJson = buf2jsonArray(buffer ttObject:handle).
+        
+        // then
+        copy-lob from cJson to file "target/saveTempTableAsFormattedArray.json".
+    end method.
+
     /*------------------------------------------------------------------------------
      Purpose:
      Notes:
@@ -96,6 +135,7 @@ class bpmid.rest-mapper.RestServiceTest inherits RestService:
         empty temp-table ttObject.
         empty temp-table ttSub.
         dataset dsObject:empty-dataset ().
+        this-object:formatJson = false.
 	end method.
 
 end class.
