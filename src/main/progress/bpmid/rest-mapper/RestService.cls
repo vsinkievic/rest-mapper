@@ -15,10 +15,14 @@ block-level on error undo, throw.
 
 class bpmid.rest-mapper.RestService abstract: 
      
+	define public property formatJson as logical initial false no-undo 
+	get.
+	set. 
+
     method protected longchar buf2jsonArray(h as handle):
         def var s as longchar no-undo.
         
-        h:write-json("longchar", s, true).
+        h:write-json("longchar", s, formatJson).
         if s = ? or length(s) <=4
         then return "[]".
         
