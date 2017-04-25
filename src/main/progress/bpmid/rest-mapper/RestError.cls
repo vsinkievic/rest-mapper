@@ -26,7 +26,15 @@ class bpmid.rest-mapper.RestError inherits AppError:
 	define public property responseStatus as integer no-undo 
 	get.
 	private set. 
-
+	
+	define public property errorStack as char no-undo
+	get:
+	    if errorStack > ""
+	    then return errorStack.
+	    else return callStack.
+	end.
+	private set.
+	
 	/*------------------------------------------------------------------------------
 	 Purpose:
 	 Notes:
@@ -46,6 +54,9 @@ class bpmid.rest-mapper.RestError inherits AppError:
 		    if oAppError:ReturnValue > ""
 		    then msg = msg + oAppError:ReturnValue.
 		end.
+		
+		if oError:CallStack > ""
+		then this-object:errorStack = oError:CallStack.
 		
 	end constructor.
 

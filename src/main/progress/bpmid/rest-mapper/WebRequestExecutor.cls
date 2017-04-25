@@ -267,10 +267,18 @@ class bpmid.rest-mapper.WebRequestExecutor:
     ------------------------------------------------------------------------------*/
 
     method private longchar _OutputRestErrorAsHtml( oRestError as RestError ):
+        def var cResponse as longchar no-undo.
+        def var cErrorStack as char no-undo.
         
-        return subst('<html><body><h1>&1</h1><p>&2</p></body></html>', 
-                    oRestError:err, oRestError:msg, _getCgiValue("env", "REQUEST_URI")).
+        responseContentType = "text/html".
 
+        if oRestError:errorStack > ""
+        then cErrorStack = subst("<hr>CALL STACK:<pre>&1</pre>", oRestError:errorStack).
+        
+        cResponse = subst('<html><body><h1>&1</h1><p>&2</p><hr>REQUEST_URI: &3 &4</body></html>', 
+                    oRestError:err, oRestError:msg, _getCgiValue("env", "REQUEST_URI"), cErrorStack).
+        
+        return cResponse.
     end method.
 
 	/*------------------------------------------------------------------------------
