@@ -103,6 +103,19 @@ class bpmid.rest-mapper.WebRequestExecutor:
 
 	end method.
 
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    method private memptr _getBinaryFile( pcName as char ):
+        
+        if session:client-type = "WEBSPEED"
+        then return web-context:get-binary-data ( pcName).
+        else return ?. 
+
+    end method.
+
 	/*------------------------------------------------------------------------------
 	 Purpose:
 	 Notes:
@@ -347,6 +360,7 @@ class bpmid.rest-mapper.WebRequestExecutor:
         define variable cParamValue as char no-undo.
         define variable iIntValue as integer no-undo.
         define variable iInt64Value as int64 no-undo.
+        define variable mUploadedFile as memptr no-undo.
 
         _initPersistentVariables().
         
@@ -468,14 +482,17 @@ class bpmid.rest-mapper.WebRequestExecutor:
                             then do:
                                 cParamType = entry(1, oParameter:name, "_").
                                 case cParamType:
+                                    when "file"
+                                    then mUploadedFile = _getBinaryFile(substr(oParameter:name, 6)).
+                                                                        
+                                    when "form"  
+                                    then cParamValue = _fixParamValue(_getCgiValue("FORM", substr(oParameter:name, 6))).
+
                                     when "qry"   
                                     then cParamValue = _fixParamValue(_getCgiValue("QUERY", trim(substr(oParameter:name, 5)))).
                                     
                                     when "query" 
                                     then cParamValue = _fixParamValue(_getCgiValue("QUERY", substr(oParameter:name, 7))).
-                                    
-                                    when "form"  
-                                    then cParamValue = _fixParamValue(_getCgiValue("FORM", substr(oParameter:name, 6))).
                                     
                                     otherwise cParamValue = _GetParameter(pcPathParams, oParameter:Name).                                         
                                end.
@@ -507,6 +524,18 @@ class bpmid.rest-mapper.WebRequestExecutor:
                                                     oParameter:Mode:ToString(), 
                                                     iIntValue).   
                                         end. 
+                                        
+                                        when DataType:Memptr then do:
+                                            if entry(1, oParameter:name, "_") = "file"
+                                            then do:
+                                                oInvokeParameters:SetParameter(parametersLoop,
+                                                     oParameter:DataType:ToString(),
+                                                     oParameter:Mode:ToString(),
+                                                     mUploadedFile).
+                                            end.
+                                            else undo, throw new Progress.Lang.AppError(subst("Unsupported MEMPTR parameter &1 '&2' as &3 in method &4:&5",
+                                                oParameter:Mode:ToString(), oParameter:Name, oParameter:DataType:ToString(), cClassName, cMethodName), 500).
+                                        end.
                                         
                                         otherwise do:
                                         undo, throw new Progress.Lang.AppError(subst("Unsupported parameter &1 '&2' as &3 in method &4:&5",
@@ -559,6 +588,11 @@ class bpmid.rest-mapper.WebRequestExecutor:
         end.
             
 		return.
+		
+		finally:
+            if get-size(mUploadedFile) > 0
+            then set-size(mUploadedFile) = 0.    		
+        end finally.
 
 	end method.
 
