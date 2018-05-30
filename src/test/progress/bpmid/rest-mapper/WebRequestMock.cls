@@ -83,6 +83,8 @@ class bpmid.rest-mapper.WebRequestMock implements IWebRequest:
 	    then do:
 	       cPath = substr(cPath, i + 1).
 	       cPath = substr(cPath, index(cPath, "/")).
+	       if r-index(cPath, "/") = length(cPath)
+	       then cPath = substr(cPath, 1, length(cPath) - 1).
 	    end.
 	    return cPath.
 	end.
@@ -127,6 +129,10 @@ class bpmid.rest-mapper.WebRequestMock implements IWebRequest:
 	define public property URI as OpenEdge.Net.URI no-undo 
 	get.
 	set. 
+
+	define public property UriTemplate as character no-undo 
+	get.
+	set.
 
 	define public property Version as character no-undo 
 	get.

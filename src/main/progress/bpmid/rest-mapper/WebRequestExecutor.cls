@@ -36,6 +36,14 @@ class bpmid.rest-mapper.WebRequestExecutor:
     get.
     private set. 
 
+	define public property responseHeader as HttpHeader no-undo 
+	get.
+	set.
+	
+	define public property responseHeaders as HttpHeaderCollection no-undo 
+    get.
+    set. 
+
     define static protected property singletonObject as WebRequestExecutor no-undo 
     get.
     set. 
@@ -306,6 +314,8 @@ class bpmid.rest-mapper.WebRequestExecutor:
 		responseStatus = 200.
 		delete object (responseCookie) no-error.
 		delete object (responseCookies) no-error.
+		delete object (responseHeader) no-error.
+		delete object (responseHeaders) no-error.
 		return.
 
 	end method.
@@ -427,6 +437,16 @@ class bpmid.rest-mapper.WebRequestExecutor:
                             _IsParameterValid(oParameter, "OpenEdge.Net.HTTP.CookieCollection", "OUTPUT").
                             oInvokeParameters:SETPARAMETER (parametersLoop, "OpenEdge.Net.HTTP.CookieCollection", "OUTPUT", responseCookies).    
                         end.
+                        
+                        when "responseHeader" then do:
+                            _IsParameterValid(oParameter, "OpenEdge.Net.HTTP.HttpHeader", "OUTPUT").
+                            oInvokeParameters:SETPARAMETER (parametersLoop, "OpenEdge.Net.HTTP.HttpHeader", "OUTPUT", responseHeader).
+                        end.
+                        
+                        when "responseHeaders" then do:
+                            _IsParameterValid(oParameter, "OpenEdge.Net.HTTP.HttpHeaderCollection", "OUTPUT").
+                            oInvokeParameters:SETPARAMETER (parametersLoop, "OpenEdge.Net.HTTP.HttpHeaderCollection", "OUTPUT", responseHeaders).
+                        end.    
                         
                         when "requestBody" then do:
                             copy-lob web-context:form-long-input to cRequestBody 

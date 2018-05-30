@@ -62,6 +62,8 @@ class bpmid.rest-mapper.UrlMapper:
         else do:
             cPath = substr(pcUrl, 1, max(1, i - 1)).
             cQuery = substr(pcUrl, i + 1).
+            if r-index(cQuery, "/") = length(cQuery)
+            then cQuery = substr(cQuery, 1, length(cQuery) - 1).
         end.
         cPath = cPath + "/".
         
