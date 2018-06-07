@@ -9,6 +9,7 @@
     Notes       : 
   ----------------------------------------------------------------------*/
 
+using Progress.Json.ObjectModel.*.
 using Progress.Lang.*.
 using Progress.Reflect.*.
 using bpmid.rest-mapper.*.
@@ -276,8 +277,16 @@ class bpmid.rest-mapper.WebRequestExecutor:
 
 	method private longchar _OutputRestErrorAsJSON( oRestError as RestError ):
 		
-        return subst('~{ "err": "&1", "msg": "&2", "message": "&2", "path": "&3" ~}', 
-                        oRestError:err, oRestError:msg, _getCgiValue("env", "REQUEST_URI")).
+		def var oJsonObject as JsonObject no-undo.
+		def var cLongChar as longchar no-undo.
+        
+        oJsonObject = new JsonObject().
+        oJsonObject:Add("err", oRestError:err).
+        oJsonObject:Add("msg", oRestError:msg).
+        oJsonObject:Add("message", oRestError:msg ).
+        oJsonObject:Add("path", _getCgiValue("env", "REQUEST_URI")).
+        oJsonObject:Write(cLongchar).
+        return cLongChar.
 
 	end method.
 
