@@ -247,8 +247,6 @@ class bpmid.rest-mapper.TestWebRequestExecutor:
 	method public void TearDownTest(  ):  
         message subst("Test: &1", program-name(1)).
 
-        set-size(moExec:responseBodyMptr) = 0.
-        
         if valid-object(moExec)
         then delete object moExec.
         

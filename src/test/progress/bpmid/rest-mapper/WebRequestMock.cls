@@ -114,6 +114,11 @@ class bpmid.rest-mapper.WebRequestMock implements IWebRequest:
 	get.
 	set. 
 
+    define public property ResolvedWebAppPath as character no-undo 
+    get.
+    private set. 
+     
+
 	define public property ServerSoftware as character no-undo 
 	get.
 	set. 
@@ -245,6 +250,12 @@ class bpmid.rest-mapper.WebRequestMock implements IWebRequest:
 
 	end method.
 
+    method public void SetCookies( input poCookies as OpenEdge.Net.HTTP.Cookie extent ):
+        
+        undo, throw new Progress.Lang.AppError("METHOD NOT IMPLEMENTED").
+
+    end method.
+
 	method public void SetHeader( input poHeader as OpenEdge.Net.HTTP.HttpHeader ):
 		
 		if poHeader = ?
@@ -259,5 +270,11 @@ class bpmid.rest-mapper.WebRequestMock implements IWebRequest:
 		ttHeader.obj = poHeader.
 
 	end method.
+
+    method public void SetHeaders( input poHeader as OpenEdge.Net.HTTP.HttpHeader extent ):
+        
+        undo, throw new Progress.Lang.AppError("METHOD NOT IMPLEMENTED").
+
+    end method.
 
 end class.
