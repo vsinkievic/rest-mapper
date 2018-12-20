@@ -83,6 +83,9 @@ class bpmid.rest-mapper.WebRequestExecutor:
 	get.
 	private set. 
 
+    define public property isResponseSent as logical no-undo
+    get.
+    private set.
 
 	/*------------------------------------------------------------------------------
 	 Purpose:
@@ -321,6 +324,7 @@ class bpmid.rest-mapper.WebRequestExecutor:
 		set-size(responseBodyMptr) = 0.
 		responseContentType = defaultResponseContentType.
 		responseStatus = 200.
+		isResponseSent = false.
 		delete object (responseCookie) no-error.
 		delete object (responseCookies) no-error.
 		delete object (responseHeader) no-error.
@@ -427,9 +431,14 @@ class bpmid.rest-mapper.WebRequestExecutor:
                             oInvokeParameters:SETPARAMETER (parametersLoop, "CHARACTER", "INPUT", mcHttpHost).    
                         end.
                         
-                        when "host_url" or when "hostUrl"then do:
+                        when "host_url" or when "hostUrl" then do:
                             _IsParameterValid(oParameter, "CHARACTER", "INPUT").
                             oInvokeParameters:SETPARAMETER (parametersLoop, "CHARACTER", "INPUT", mcHostUrl).    
+                        end.
+                        
+                        when "is_response_sent" or when "isResponseSent" then do:
+                            _isParameterValid(oParameter, "LOGICAL", "OUTPUT").
+                            oInvokeParameters:SetParameter(parametersLoop, "LOGICAL", "OUTPUT", isResponseSent).
                         end.
 
                         when "requestCookie" then do:
