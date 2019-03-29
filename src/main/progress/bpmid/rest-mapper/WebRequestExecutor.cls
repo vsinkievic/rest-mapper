@@ -48,7 +48,7 @@ class bpmid.rest-mapper.WebRequestExecutor:
     define static protected property singletonObject as WebRequestExecutor no-undo 
     get.
     set. 
-
+    
     define public property defaultResponseCharacterEncoding as character no-undo 
     get.
     set (cValue as char): 
@@ -358,12 +358,22 @@ class bpmid.rest-mapper.WebRequestExecutor:
 
 	end method.
 
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    method public void ExecuteRequest( poRequest as iWebRequest, cClassName as char, cMethodName as char, pcPathParams as char ):
+
+        ExecuteRequest(poRequest, cClassName, cMethodName, pcPathParams, ?).
+    end method.
+    
 	/*------------------------------------------------------------------------------
 	 Purpose:
 	 Notes:
 	------------------------------------------------------------------------------*/
 
-	method public void ExecuteRequest( poRequest as iWebRequest, cClassName as char, cMethodName as char, pcPathParams as char ):
+	method public void ExecuteRequest( poRequest as iWebRequest, cClassName as char, cMethodName as char, pcPathParams as char, poAuthentication as IAuthentication):
         
         define variable lIsBean as logical no-undo.
         define variable oClass as class Class no-undo.
@@ -515,6 +525,13 @@ class bpmid.rest-mapper.WebRequestExecutor:
                                 responseStatus).    
                         end.
 
+                        when "webUser" then do:
+                            _IsParameterValid(oParameter, "bpmid.rest-mapper.IAuthentication", "INPUT").
+                            if valid-object (poAuthentication) 
+                            then oInvokeParameters:SETPARAMETER (parametersLoop, "bpmid.rest-mapper.IAuthentication", "INPUT", poAuthentication).
+                            else undo, throw new AppError("Authentication was not set!", 500).
+                        end.    
+
                         otherwise do:
                             if num-entries(oParameter:name, "_") > 0
                             then do:
@@ -577,19 +594,19 @@ class bpmid.rest-mapper.WebRequestExecutor:
                                         
                                         otherwise do:
                                         undo, throw new Progress.Lang.AppError(subst("Unsupported parameter &1 '&2' as &3 in method &4:&5",
-                                            oParameter:Mode:ToString(), oParameter:Name, oParameter:DataType:ToString(), cClassName, cMethodName), 200).
+                                            oParameter:Mode:ToString(), oParameter:Name, oParameter:DataType:ToString(), cClassName, cMethodName), 500).
                                         end.
                                     end.
                                 end.
                                 
                                 when ParameterMode:Output then do:
                                     undo, throw new Progress.Lang.AppError(subst("Unsupported output parameter name '&1' in method &2:&3",
-                                                                              oParameter:Name, cClassName, cMethodName), 200).
+                                                                              oParameter:Name, cClassName, cMethodName), 500).
                                 end.
                                 
                                 otherwise do:
                                 undo, throw new Progress.Lang.AppError(subst("Unsupported parameter &1 '&2' in method &3:&4",
-                                    oParameter:Mode:ToString(), oParameter:Name, cClassName, cMethodName), 200).
+                                    oParameter:Mode:ToString(), oParameter:Name, cClassName, cMethodName), 500).
                                 end.
                             end.
                         end.
